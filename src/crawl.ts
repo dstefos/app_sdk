@@ -42,13 +42,16 @@ export class FirecrawlService {
         return statusResponse;
     }
 
-    public static async getCrawlResults(siteUrl: string, maxPages: number, maxDepth: number): Promise<PageData[]> {
+    public static async getCrawlResults(siteUrl: string, maxPages: number, maxDepth: number, timeDelay: number = 5000): Promise<PageData[]> {
         const jobId = await this.crawlURLs(siteUrl, maxPages, maxDepth);
         console.log(`Crawl job started with ID: ${jobId}`);
 
         while (true) {
             console.log(`Waiting for 5 seconds before checking the status...`);
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            // don't initiate a delay if timeDelay is 0
+            // this allows for faster testing
+            if( timeDelay > 0)
+                await new Promise(resolve => setTimeout(resolve, timeDelay));
 
             console.log(`Checking status for job ID: ${jobId}`);
             const status = await this.getCrawlStatus(jobId);
