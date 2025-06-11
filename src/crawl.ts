@@ -22,6 +22,7 @@ export class FirecrawlService {
             maxDepth: maxDepth,
             ignoreSitemap: true,
             scrapeOptions: {
+                onlyMainContent: true,
                 formats: ['markdown'],
             }
         });
