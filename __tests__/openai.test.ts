@@ -1,4 +1,4 @@
-import { OpenAIService } from "../src/openai";
+import { OpenAIService } from "../src/openai.js";
 import { OpenAI } from "openai";
 
 // Mock OpenAI's chat API

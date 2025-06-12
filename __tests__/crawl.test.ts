@@ -1,4 +1,4 @@
-import { FirecrawlService } from "../src/crawl";
+import { FirecrawlService } from "../src/crawl.js";
 import Firecrawl from "@mendable/firecrawl-js";
 
 jest.mock("@mendable/firecrawl-js");

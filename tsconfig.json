@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "NodeNext",
+    "isolatedModules": true,
     "esModuleInterop": true,
-    "target": "es6",
-    "moduleResolution": "node",
+    "target": "ES2020",
+    "moduleResolution": "NodeNext",
     "sourceMap": true,
-    "outDir": "dist"
-  },
-  "lib": ["es2015"]
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "lib": [
+      "ES2020",
+      "DOM"
+    ]
+  }
 }

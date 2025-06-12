@@ -1,5 +1,5 @@
 import Firecrawl from "@mendable/firecrawl-js";
-import { config } from "./config";
+import { config } from "./config.js";
 
 export interface PageData {
     title: string;
