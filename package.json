@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "npx tsc && node ./dist/src/index.js https://prismic.io/blog",
-    "test": "jest"
+    "test": "jest",
+    "setup": "node ./scripts/setup.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
