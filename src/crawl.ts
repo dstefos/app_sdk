@@ -31,8 +31,8 @@ export class FirecrawlService {
             throw new Error(`Failed to crawl: ${crawlResponse.error}`);
         }
 
-        console.log("Crawl job started successfully. Response:");
-        console.log(crawlResponse);
+        
+        console.log(`Crawl job started successfully, with ID: ${crawlResponse.id}`);
         return crawlResponse.id;
     }
 
@@ -44,12 +44,12 @@ export class FirecrawlService {
 
     public static async getCrawlResults(siteUrl: string, maxPages: number, maxDepth: number, timeDelay: number = 5000): Promise<PageData[]> {
         const jobId = await this.crawlURLs(siteUrl, maxPages, maxDepth);
-        console.log(`Crawl job started with ID: ${jobId}`);
 
         while (true) {
             console.log(`Waiting for 5 seconds before checking the status...`);
-            // don't initiate a delay if timeDelay is 0
-            // this allows for faster testing
+
+            // Wait for the specified time delay before checking the status
+            // don't initiate a delay if timeDelay is 0, this allows for faster testing
             if( timeDelay > 0)
                 await new Promise(resolve => setTimeout(resolve, timeDelay));
 
@@ -59,12 +59,10 @@ export class FirecrawlService {
 
             if (status.status === 'completed') {
                 console.log("Crawl completed successfully.");
-                console.log("Crawl results:", status);
                 return this.parseCrawlData(status.data);
             } else if (status.status === 'failed') {
                 throw new Error(`Crawl failed: ${status.error}`);
             }
-
         }
     }
 

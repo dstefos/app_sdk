@@ -23,6 +23,6 @@ module.exports = {
   /* 2️⃣  Map *only* our own “.js” specifiers back to the TS sources */
   moduleNameMapper: {
     '^(\\.{1,2}/src/.*)\\.js$': '$1.ts',    // ../src/foo.js  -> ../src/foo.ts
-    '^\\./config\\.js$': './config.ts',     //  ./config.js   ->  ./config.ts
+    '^\\./(crawl|openai|prismic|config)\\.js$': './$1.ts',
   },
 };

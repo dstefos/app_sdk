@@ -29,7 +29,7 @@ You are an assistant that analyzes blog content.
 Given the following blog post content, return the following:
 1. A concise 3-4 sentence summary.
 2. A list of 3–5 tags or categories that describe the content.
-3. 3–5 key takeaways (in bullet points).
+3. 3 key takeaways (in bullet points).
 
 Respond ONLY in JSON with the following keys:
 {
@@ -45,12 +45,14 @@ ${page.content}
 
     console.log("Analyzing page:", page.title);
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4.1",
       temperature: 0.7,
       messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
     });
+    
     console.log("OpenAI response received for:", page.title);
-    let parsed:any;
+    let parsed: any;
     try {
       parsed = JSON.parse(response.choices[0].message.content || "{}");
     } catch (err) {

@@ -33,61 +33,48 @@ export class PrismicService {
    * Push a single EnrichedPage into Prismic under the
    * custom type `enriched_article`.
    */
-  public static async createArticle(page: EnrichedPage): Promise<void> {
-    console.log(`📝  Pushing "${page.title}" to Prismic…`);
+  public static async createArticles(
+    pages: EnrichedPage[],
+    { stripImages = true } = {},
+  ): Promise<void> {
+    if (!pages.length) return;
+
+    console.log(`📝  Pushing ${pages.length} articles to Prismic…`);
 
     const migration = prismic.createMigration();
 
-    const fullContent = htmlAsRichText(marked.parse(page.fullcontent),{
-    serializer: {
-      img: () => null,              // skip all images
-    }}).result;
-    console.log("Full content converted to Prismic rich text format.");
-    console.log(fullContent)
-    migration.createDocument(
-      {
-        type: "enriched_article",
-        uid: this.slugify(page.title),
-        lang: "en-us",
-        tags: page.tags_category,
-        data: {
-          title: [
-            {
-              type: "heading1",
-              text: page.title,
+    for (const page of pages) {
+      const rich = htmlAsRichText(marked.parse(page.fullcontent), {
+        serializer: stripImages ? { img: () => null } : undefined,
+      }).result;
+
+      migration.createDocument(
+        {
+          type: "enriched_article",
+          uid: this.slugify(page.title),
+          lang: "en-us",
+          tags: page.tags_category,
+          data: {
+            title: [{ type: "heading1", text: page.title, spans: [] }],
+            fullcontent: rich,
+            summary: [{ type: "paragraph", text: page.summary, spans: [] }],
+            key_takeaways: page.key_takeaways.map((t) => ({
+              type: "list-item",
+              text: t,
               spans: [],
-            },
-          ],
-          fullcontent: fullContent,
-          summary: [
-            {
-              type: "paragraph",
-              text: page.summary,
-              spans: [],
-            },
-          ],
-          key_takeaways: page.key_takeaways.map((t) => ({
-            type: "list-item",
-            text: t,
-            spans: [],
-          })),
-          source_url: {
-            link_type: "Web",
-            url: page.url,
+            })),
+            source_url: { link_type: "Web", url: page.url },
           },
         },
-      },
-      page.title, // title shown in Prismic UI
-    );
+        page.title,
+      );
+    }
 
-    // Execute the migration
-    console.log(`🚀  Executing migration for "${page.title}"…`)
-    console.log("Migration details:", migration);
-    console.log("Migration JSON:", JSON.stringify(migration, null, 2));
-    return await this.writeClient.migrate(migration, {
-      reporter: (event) => console.log("[Prismic]", event.type),
+    console.log("🚀  Executing migration…");
+    await this.writeClient.migrate(migration, {
+      reporter: (e) => console.log("[Prismic]", e.type),
     });
 
-    console.log(`✅  "${page.title}" published to Prismic.`);
+    console.log(`✅  ${pages.length} articles pushed to Prismic.`);
   }
 }
