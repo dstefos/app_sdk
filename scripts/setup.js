@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
 import readline from 'readline';
@@ -7,16 +9,8 @@ const examplePath = '.env.example';
 const envPath = '.env';
 
 async function prompt(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
-  });
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => rl.question(question, (ans) => { rl.close(); resolve(ans.trim()); }));
 }
 
 async function main() {
@@ -27,15 +21,13 @@ async function main() {
 
   if (!existsSync(envPath)) {
     console.log(`Creating ${envPath} from ${examplePath}`);
-    const content = await fs.readFile(examplePath, 'utf-8');
-    const lines = content.split('\n');
-    const result = [];
+    let content = await fs.readFile(examplePath, 'utf-8');
+    content = content.replace(/\r\n/g, '\n'); // Normalize CRLF
 
-    for (const line of lines) {
-      if (!line || line.startsWith('#')) {
-        result.push(line);
-        continue;
-      }
+    const result = [];
+    for (const rawLine of content.split('\n')) {
+      const line = rawLine.replace(/\r$/, '');
+      if (!line || line.startsWith('#')) { result.push(line); continue; }
       const [key, defaultVal] = line.split('=', 2);
       const promptText = defaultVal
         ? `Enter value for ${key} (default: ${defaultVal}): `
@@ -50,13 +42,27 @@ async function main() {
     console.log(`${envPath} already exists. Skipping creation.`);
   }
 
-  const installer = spawn('npm', ['install'], { stdio: 'inherit' });
+  // Install dependencies
+  const installer = spawn('npm', ['install'], { stdio: 'inherit', shell: true });
+  installer.on('error', (err) => { console.error(`Failed to run npm install: ${err.message}`); process.exit(1); });
+
   installer.on('close', (code) => {
-    if (code === 0) {
-      console.log('Dependencies installed successfully.');
-    } else {
+    if (code !== 0) {
       console.error(`npm install exited with code ${code}.`);
+      process.exit(code);
     }
+    console.log('Dependencies installed successfully.');
+
+    // Run tests after install
+    const tester = spawn('npm', ['test'], { stdio: 'inherit', shell: true });
+    tester.on('error', (err) => { console.error(`Failed to run npm test: ${err.message}`); process.exit(1); });
+    tester.on('close', (testCode) => {
+      if (testCode !== 0) {
+        console.error(`npm test exited with code ${testCode}.`);
+        process.exit(testCode);
+      }
+      console.log('All tests passed successfully.');
+    });
   });
 }
 

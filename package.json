@@ -9,7 +9,7 @@
     "openai": "^5.3.0"
   },
   "scripts": {
-    "start": "npx tsc && node ./dist/src/index.js https://prismic.io/blog",
+    "start": "npx tsc && node ./dist/src/index.js",
     "test": "jest",
     "setup": "node ./scripts/setup.js"
   },
